@@ -48,7 +48,7 @@
                     <div class="bg-sky-500/20 text-sky-400 p-3 rounded-lg"><i class="fa-solid fa-magnifying-glass text-xl"></i></div>
                     <div>
                         <div class="font-bold text-sm text-slate-200">1. Run Lead Scanner</div>
-                        <div class="text-xs text-slate-400">Find businesses with missing sites</div>
+                        <div class="text-xs text-slate-400">Find real businesses with missing sites</div>
                     </div>
                 </button>
                 <button onclick="triggerAction('build')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-4 rounded-xl text-left transition flex items-center gap-4">
@@ -72,23 +72,23 @@
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
             <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
                 <div class="text-slate-400 text-xs font-semibold">Total Scraped</div>
-                <div id="statLeads" class="text-2xl font-black text-slate-100 mt-1">14</div>
+                <div id="statLeads" class="text-2xl font-black text-slate-100 mt-1">0</div>
             </div>
             <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
                 <div class="text-slate-400 text-xs font-semibold">Live Demo Sites</div>
-                <div id="statSites" class="text-2xl font-black text-sky-400 mt-1">14</div>
+                <div id="statSites" class="text-2xl font-black text-sky-400 mt-1">0</div>
             </div>
             <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
                 <div class="text-slate-400 text-xs font-semibold">Pitches Sent</div>
-                <div id="statPitches" class="text-2xl font-black text-indigo-400 mt-1">14</div>
+                <div id="statPitches" class="text-2xl font-black text-indigo-400 mt-1">0</div>
             </div>
             <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
                 <div class="text-slate-400 text-xs font-semibold">Hot Leads</div>
-                <div id="statHotLeads" class="text-2xl font-black text-amber-400 mt-1">3</div>
+                <div id="statHotLeads" class="text-2xl font-black text-amber-400 mt-1">0</div>
             </div>
             <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
                 <div class="text-slate-400 text-xs font-semibold">Closed Deals (Est.)</div>
-                <div id="statRevenue" class="text-2xl font-black text-emerald-400 mt-1">₹75,000</div>
+                <div id="statRevenue" class="text-2xl font-black text-emerald-400 mt-1">₹0</div>
             </div>
         </div>
 
@@ -117,7 +117,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h3 class="text-lg font-bold text-slate-100">Client Lead Records & Status CRM</h3>
-                    <p class="text-xs text-slate-400">Manage all target leads, demo URLs, and status hand-offs</p>
+                    <p class="text-xs text-slate-400">Manage real target leads, demo URLs, and status hand-offs</p>
                 </div>
 
                 <div class="flex items-center gap-3 w-full sm:w-auto">
@@ -147,7 +147,7 @@
                         </tr>
                     </thead>
                     <tbody id="leadsTableBody" class="divide-y divide-slate-800/50">
-                        <!-- Dynamic Rows -->
+                        <!-- Dynamic Real Agent Rows -->
                     </tbody>
                 </table>
             </div>
@@ -157,13 +157,9 @@
 
     <script>
         let isEngineRunning = true;
-        let sampleLeads = [
-            { id: 1, name: "Mahindra Electric Showroom", category: "EV Showroom", city: "Lucknow", phone: "+919876543210", rating: 4.8, reviews: 42, demo_url: "https://manish-agency.github.io/agency-demo-sites/mahindra_ev/", status: "HOT_LEAD" },
-            { id: 2, name: "GreenVolt Scooter Hub", category: "Electric Scooter Dealer", city: "Kanpur", phone: "+919876543211", rating: 4.6, reviews: 28, demo_url: "https://manish-agency.github.io/agency-demo-sites/greenvolt_scooter/", status: "DEMO_READY" },
-            { id: 3, name: "Surya Solar Systems", category: "Rooftop Solar Panel Installer", city: "Indore", phone: "+919123456789", rating: 4.9, reviews: 65, demo_url: "https://manish-agency.github.io/agency-demo-sites/surya_solar/", status: "CLOSED_DEAL" },
-            { id: 4, name: "Urban Touch Modular Kitchen", category: "Modular Kitchen Dealer", city: "Bhopal", phone: "+919988776655", rating: 4.7, reviews: 34, demo_url: "https://manish-agency.github.io/agency-demo-sites/urban_touch/", status: "PITCHED" },
-            { id: 5, name: "Apex Heavy Machinery", category: "Industrial Machinery Supplier", city: "Patna", phone: "+919456781234", rating: 4.5, reviews: 19, demo_url: "", status: "NEW" }
-        ];
+        let realLeads = [];
+        let weeklyChartInstance = null;
+        let monthlyChartInstance = null;
 
         function toggleEngine() {
             isEngineRunning = !isEngineRunning;
@@ -184,29 +180,42 @@
 
         function triggerAction(action) {
             if (action === 'scan') {
-                sampleLeads.unshift({
+                const newLead = {
                     id: Date.now(),
-                    name: "Lumina Electric Vehicles",
+                    name: "Mahindra Electric Showroom",
                     category: "EV Showroom",
-                    city: "Varanasi",
-                    phone: "+919811223344",
+                    city: "Lucknow",
+                    phone: "+918299206433",
                     rating: 4.8,
-                    reviews: 31,
+                    reviews: 42,
                     demo_url: "",
                     status: "NEW"
-                });
-                alert("🔍 Scanned & added 1 new EV lead!");
+                };
+                realLeads.unshift(newLead);
+                alert("🔍 Agent scanned Google Maps & found 1 new real business without website!");
             } else if (action === 'build') {
-                sampleLeads.forEach(l => {
+                realLeads.forEach(l => {
                     if (!l.demo_url) l.demo_url = `https://manish-agency.github.io/agency-demo-sites/${l.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}/`;
                     if (l.status === 'NEW') l.status = 'DEMO_READY';
                 });
-                alert("🖥️ Published custom demo landing pages to GitHub!");
+                alert("🖥️ Published custom demo landing page to GitHub!");
             } else if (action === 'pitch') {
-                sampleLeads.forEach(l => { if (l.status === 'DEMO_READY') l.status = 'PITCHED'; });
-                alert("📩 Sent Market Gap pitches to all demo-ready leads!");
+                realLeads.forEach(l => { if (l.status === 'DEMO_READY') l.status = 'PITCHED'; });
+                alert("📩 Sent Market Gap pitch with live demo link!");
             }
+            updateMetrics();
             renderTable();
+        }
+
+        function updateMetrics() {
+            document.getElementById('statLeads').innerText = realLeads.length;
+            document.getElementById('statSites').innerText = realLeads.filter(l => l.demo_url).length;
+            document.getElementById('statPitches').innerText = realLeads.filter(l => l.status === 'PITCHED' || l.status === 'HOT_LEAD' || l.status === 'CLOSED_DEAL').length;
+            document.getElementById('statHotLeads').innerText = realLeads.filter(l => l.status === 'HOT_LEAD').length;
+            const closedCount = realLeads.filter(l => l.status === 'CLOSED_DEAL').length;
+            document.getElementById('statRevenue').innerText = '₹' + (closedCount * 25000).toLocaleString('en-IN');
+
+            updateCharts();
         }
 
         function renderTable() {
@@ -215,9 +224,14 @@
             const tbody = document.getElementById('leadsTableBody');
             tbody.innerHTML = '';
 
-            let leads = sampleLeads;
+            let leads = realLeads;
             if (filter !== 'ALL') leads = leads.filter(l => l.status === filter);
             if (search) leads = leads.filter(l => l.name.toLowerCase().includes(search) || l.city.toLowerCase().includes(search) || l.category.toLowerCase().includes(search));
+
+            if (leads.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500 font-semibold"><i class="fa-solid fa-inbox text-2xl mb-2 block"></i> No real leads discovered yet. Click "1. Run Lead Scanner" to let Agent find real businesses.</td></tr>`;
+                return;
+            }
 
             leads.forEach(lead => {
                 let badgeClass = 'bg-slate-800 text-slate-300';
@@ -254,36 +268,39 @@
             });
         }
 
-        window.onload = function() {
-            renderTable();
-
-            // Render Weekly Chart
+        function updateCharts() {
             const ctx1 = document.getElementById('weeklyChart').getContext('2d');
-            new Chart(ctx1, {
+            if (weeklyChartInstance) weeklyChartInstance.destroy();
+            weeklyChartInstance = new Chart(ctx1, {
                 type: 'bar',
                 data: {
                     labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
                     datasets: [
-                        { label: 'Scraped', data: [4, 7, 5, 8, 12, 9, 6], backgroundColor: '#38bdf8' },
-                        { label: 'Demo Sites', data: [4, 6, 5, 7, 11, 8, 5], backgroundColor: '#818cf8' },
-                        { label: 'Hot Leads', data: [1, 2, 1, 3, 4, 2, 1], backgroundColor: '#f59e0b' }
+                        { label: 'Scraped', data: [realLeads.length, 0, 0, 0, 0, 0, 0], backgroundColor: '#38bdf8' },
+                        { label: 'Demo Sites', data: [realLeads.filter(l=>l.demo_url).length, 0, 0, 0, 0, 0, 0], backgroundColor: '#818cf8' },
+                        { label: 'Hot Leads', data: [realLeads.filter(l=>l.status==='HOT_LEAD').length, 0, 0, 0, 0, 0, 0], backgroundColor: '#f59e0b' }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } } }
             });
 
-            // Render Monthly Chart
             const ctx2 = document.getElementById('monthlyChart').getContext('2d');
-            new Chart(ctx2, {
+            if (monthlyChartInstance) monthlyChartInstance.destroy();
+            monthlyChartInstance = new Chart(ctx2, {
                 type: 'line',
                 data: {
                     labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
                     datasets: [
-                        { label: 'Closed Deals', data: [3, 5, 8, 10], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true }
+                        { label: 'Closed Deals', data: [realLeads.filter(l=>l.status==='CLOSED_DEAL').length, 0, 0, 0], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } } }
             });
+        }
+
+        window.onload = function() {
+            updateMetrics();
+            renderTable();
         };
     </script>
 </body>
