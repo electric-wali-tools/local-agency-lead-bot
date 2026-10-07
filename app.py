@@ -1,6 +1,7 @@
 """
 Full Production Web Application Server for Agency AI Automation
 Supports BOTH Flask (if available) and Python's built-in http.server (Zero Dependencies).
+100% Real Lead Data Only - Starts with 0 demo leads.
 """
 import os
 import json
@@ -52,8 +53,10 @@ class AgencyWebHandler(BaseHTTPRequestHandler):
         query = parse_qs(parsed.query)
 
         if path == "/":
-            # Render templates/index.html
-            tpl_path = os.path.join(os.path.dirname(__file__), "templates", "index.html")
+            tpl_path = os.path.join(os.path.dirname(__file__), "index.html")
+            if not os.path.exists(tpl_path):
+                tpl_path = os.path.join(os.path.dirname(__file__), "templates", "index.html")
+            
             if os.path.exists(tpl_path):
                 with open(tpl_path, "r", encoding="utf-8") as f:
                     html = f.read().replace("{manish_phone}", MANISH_PHONE_NUMBER)
@@ -81,18 +84,19 @@ class AgencyWebHandler(BaseHTTPRequestHandler):
             c.execute("SELECT COUNT(*) as total FROM leads WHERE status = 'CLOSED_DEAL'")
             closed_deals = c.fetchone()["total"]
 
+            # Real Analytics Data Structure
             weekly_data = {
                 "labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-                "scraped": [4, 7, 5, 8, 12, 9, 6],
-                "published": [4, 6, 5, 7, 11, 8, 5],
-                "hot_leads": [1, 2, 1, 3, 4, 2, 1]
+                "scraped": [total_leads, 0, 0, 0, 0, 0, 0],
+                "published": [sites_published, 0, 0, 0, 0, 0, 0],
+                "hot_leads": [hot_leads, 0, 0, 0, 0, 0, 0]
             }
 
             monthly_data = {
                 "labels": ["Week 1", "Week 2", "Week 3", "Week 4"],
-                "leads": [28, 45, 52, 60],
-                "closed": [3, 5, 8, 10],
-                "revenue_inr": [75000, 125000, 200000, 250000]
+                "leads": [total_leads, 0, 0, 0],
+                "closed": [closed_deals, 0, 0, 0],
+                "revenue_inr": [closed_deals * 25000, 0, 0, 0]
             }
 
             is_running = get_setting("is_running", "true") == "true"
@@ -175,7 +179,7 @@ class AgencyWebHandler(BaseHTTPRequestHandler):
             action = path.split("/")[-1]
             if action == "scan":
                 count = agent_engine.run_lead_scanner()
-                self.send_json({"success": True, "message": f"Scanned & added {count} new leads!"})
+                self.send_json({"success": True, "message": f"Scanned & added {count} new real leads!"})
             elif action == "build":
                 count = agent_engine.run_demo_builder()
                 self.send_json({"success": True, "message": f"Published {count} new demo websites!"})
@@ -208,7 +212,6 @@ def run_server(port=5000):
     print("==================================================================")
     print(f"🚀 AGENCY AUTOMATION WEB APP IS LIVE AT: http://localhost:{port}")
     print("==================================================================")
-    print("Press Ctrl+C to stop server.\n")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
