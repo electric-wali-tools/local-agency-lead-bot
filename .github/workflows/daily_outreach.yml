@@ -1,0 +1,26 @@
+name: Daily Local Business Lead Generator & Demo Publisher
+
+on:
+  schedule:
+    - cron: '30 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  run-automation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Execute Lead Generation & Outreach Engine
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          MANISH_PHONE_NUMBER: "+918299206433"
+        run: |
+          python main.py
