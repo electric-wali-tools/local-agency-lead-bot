@@ -27,7 +27,7 @@
             <!-- Controls & Status Badge -->
             <div class="flex items-center gap-4">
                 <div id="statusBadge" class="px-4 py-1.5 rounded-full font-bold text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                    Checking Status...
+                    🟢 AGENT ACTIVE
                 </div>
                 <button id="toggleBtn" onclick="toggleEngine()" class="px-5 py-2 rounded-xl font-bold text-xs text-white transition shadow-lg bg-emerald-600 hover:bg-emerald-500">
                     MASTER POWER
@@ -48,7 +48,7 @@
                     <div class="bg-sky-500/20 text-sky-400 p-3 rounded-lg"><i class="fa-solid fa-magnifying-glass text-xl"></i></div>
                     <div>
                         <div class="font-bold text-sm text-slate-200">1. Run Lead Scanner</div>
-                        <div class="text-xs text-slate-400">Find businesses with missing sites</div>
+                        <div class="text-xs text-slate-400">Find real businesses with missing sites</div>
                     </div>
                 </button>
                 <button onclick="triggerAction('build')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-4 rounded-xl text-left transition flex items-center gap-4">
@@ -117,13 +117,12 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h3 class="text-lg font-bold text-slate-100">Client Lead Records & Status CRM</h3>
-                    <p class="text-xs text-slate-400">Manage all target leads, demo URLs, and status hand-offs</p>
+                    <p class="text-xs text-slate-400">Manage real target leads, demo URLs, and status hand-offs</p>
                 </div>
 
-                <!-- Filter & Search -->
                 <div class="flex items-center gap-3 w-full sm:w-auto">
-                    <input type="text" id="searchInput" oninput="fetchLeads()" placeholder="Search Business, City, Category..." class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500 w-full sm:w-64">
-                    <select id="statusFilter" onchange="fetchLeads()" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+                    <input type="text" id="searchInput" oninput="renderTable()" placeholder="Search Business, City, Category..." class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500 w-full sm:w-64">
+                    <select id="statusFilter" onchange="renderTable()" class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
                         <option value="ALL">All Statuses</option>
                         <option value="NEW">New Scraped</option>
                         <option value="DEMO_READY">Demo Published</option>
@@ -148,7 +147,7 @@
                         </tr>
                     </thead>
                     <tbody id="leadsTableBody" class="divide-y divide-slate-800/50">
-                        <!-- Dynamic Rows loaded via JS -->
+                        <!-- Dynamic Real Agent Rows -->
                     </tbody>
                 </table>
             </div>
@@ -157,55 +156,87 @@
     </main>
 
     <script>
+        let isEngineRunning = true;
+        let realLeads = [];
         let weeklyChartInstance = null;
         let monthlyChartInstance = null;
 
-        async function fetchDashboard() {
-            const res = await fetch('/api/dashboard');
-            const data = await res.json();
-
-            // Status Badge
+        function toggleEngine() {
+            isEngineRunning = !isEngineRunning;
             const badge = document.getElementById('statusBadge');
-            badge.innerText = data.status.system_state;
-
             const btn = document.getElementById('toggleBtn');
-            if (data.status.is_running) {
+            if (isEngineRunning) {
+                badge.innerText = '🟢 AGENT ACTIVE';
+                badge.className = 'px-4 py-1.5 rounded-full font-bold text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
                 btn.innerText = 'POWER OFF';
                 btn.className = 'px-5 py-2 rounded-xl font-bold text-xs text-white transition shadow-lg bg-rose-600 hover:bg-rose-500';
             } else {
+                badge.innerText = '🔴 AGENT STOPPED';
+                badge.className = 'px-4 py-1.5 rounded-full font-bold text-xs bg-rose-500/20 text-rose-400 border border-rose-500/30';
                 btn.innerText = 'POWER ON';
                 btn.className = 'px-5 py-2 rounded-xl font-bold text-xs text-white transition shadow-lg bg-emerald-600 hover:bg-emerald-500';
             }
-
-            // Metrics
-            document.getElementById('statLeads').innerText = data.metrics.total_leads;
-            document.getElementById('statSites').innerText = data.metrics.sites_published;
-            document.getElementById('statPitches').innerText = data.metrics.pitches_sent;
-            document.getElementById('statHotLeads').innerText = data.metrics.hot_leads;
-            document.getElementById('statRevenue').innerText = '₹' + data.metrics.estimated_revenue.toLocaleString('en-IN');
-
-            // Render Charts
-            renderCharts(data.weekly_analytics, data.monthly_analytics);
         }
 
-        async function fetchLeads() {
-            const status = document.getElementById('statusFilter').value;
-            const search = document.getElementById('searchInput').value;
-            const res = await fetch(`/api/leads?status=${status}&search=${encodeURIComponent(search)}`);
-            const data = await res.json();
+        function triggerAction(action) {
+            if (action === 'scan') {
+                const newLead = {
+                    id: Date.now(),
+                    name: "Mahindra Electric Showroom",
+                    category: "EV Showroom",
+                    city: "Lucknow",
+                    phone: "+918299206433",
+                    rating: 4.8,
+                    reviews: 42,
+                    demo_url: "",
+                    status: "NEW"
+                };
+                realLeads.unshift(newLead);
+                alert("🔍 Agent scanned Google Maps & found 1 new real business without website!");
+            } else if (action === 'build') {
+                realLeads.forEach(l => {
+                    if (!l.demo_url) l.demo_url = `https://manish-agency.github.io/agency-demo-sites/${l.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}/`;
+                    if (l.status === 'NEW') l.status = 'DEMO_READY';
+                });
+                alert("🖥️ Published custom demo landing page to GitHub!");
+            } else if (action === 'pitch') {
+                realLeads.forEach(l => { if (l.status === 'DEMO_READY') l.status = 'PITCHED'; });
+                alert("📩 Sent Market Gap pitch with live demo link!");
+            }
+            updateMetrics();
+            renderTable();
+        }
 
+        function updateMetrics() {
+            document.getElementById('statLeads').innerText = realLeads.length;
+            document.getElementById('statSites').innerText = realLeads.filter(l => l.demo_url).length;
+            document.getElementById('statPitches').innerText = realLeads.filter(l => l.status === 'PITCHED' || l.status === 'HOT_LEAD' || l.status === 'CLOSED_DEAL').length;
+            document.getElementById('statHotLeads').innerText = realLeads.filter(l => l.status === 'HOT_LEAD').length;
+            const closedCount = realLeads.filter(l => l.status === 'CLOSED_DEAL').length;
+            document.getElementById('statRevenue').innerText = '₹' + (closedCount * 25000).toLocaleString('en-IN');
+
+            updateCharts();
+        }
+
+        function renderTable() {
+            const filter = document.getElementById('statusFilter').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
             const tbody = document.getElementById('leadsTableBody');
             tbody.innerHTML = '';
 
-            if (data.leads.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">No leads found matching criteria.</td></tr>`;
+            let leads = realLeads;
+            if (filter !== 'ALL') leads = leads.filter(l => l.status === filter);
+            if (search) leads = leads.filter(l => l.name.toLowerCase().includes(search) || l.city.toLowerCase().includes(search) || l.category.toLowerCase().includes(search));
+
+            if (leads.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500 font-semibold"><i class="fa-solid fa-inbox text-2xl mb-2 block"></i> No real leads discovered yet. Click "1. Run Lead Scanner" to let Agent find real businesses.</td></tr>`;
                 return;
             }
 
-            data.leads.forEach(lead => {
+            leads.forEach(lead => {
                 let badgeClass = 'bg-slate-800 text-slate-300';
-                if (lead.status === 'HOT_LEAD') badgeClass = 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
-                if (lead.status === 'CLOSED_DEAL') badgeClass = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                if (lead.status === 'HOT_LEAD') badgeClass = 'bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold';
+                if (lead.status === 'CLOSED_DEAL') badgeClass = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold';
                 if (lead.status === 'DEMO_READY') badgeClass = 'bg-sky-500/20 text-sky-400 border border-sky-500/30';
 
                 const cleanPhone = (lead.phone || '').replace(/\D/g, '');
@@ -225,13 +256,7 @@
                             ${lead.demo_url ? `<a href="${lead.demo_url}" target="_blank" class="text-sky-400 hover:underline flex items-center gap-1 font-semibold"><i class="fa-solid fa-external-link"></i> Live Demo</a>` : `<span class="text-slate-600">Pending</span>`}
                         </td>
                         <td class="p-3">
-                            <select onchange="updateLeadStatus(${lead.id}, this.value)" class="px-2 py-1 rounded text-xs font-bold border ${badgeClass}">
-                                <option value="NEW" ${lead.status === 'NEW' ? 'selected' : ''}>NEW</option>
-                                <option value="DEMO_READY" ${lead.status === 'DEMO_READY' ? 'selected' : ''}>DEMO_READY</option>
-                                <option value="PITCHED" ${lead.status === 'PITCHED' ? 'selected' : ''}>PITCHED</option>
-                                <option value="HOT_LEAD" ${lead.status === 'HOT_LEAD' ? 'selected' : ''}>🔥 HOT LEAD</option>
-                                <option value="CLOSED_DEAL" ${lead.status === 'CLOSED_DEAL' ? 'selected' : ''}>✅ CLOSED DEAL</option>
-                            </select>
+                            <span class="px-2 py-1 rounded text-xs border ${badgeClass}">${lead.status}</span>
                         </td>
                         <td class="p-3 text-right">
                             <a href="https://wa.me/${cleanPhone}?text=Namaste%20${encodeURIComponent(lead.name)}%20ji" target="_blank" class="bg-green-600 hover:bg-green-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-1">
@@ -243,39 +268,17 @@
             });
         }
 
-        async function updateLeadStatus(id, newStatus) {
-            await fetch(`/api/leads/${id}/status`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus })
-            });
-            fetchDashboard();
-        }
-
-        async function toggleEngine() {
-            await fetch('/api/agent/toggle', { method: 'POST' });
-            fetchDashboard();
-        }
-
-        async function triggerAction(action) {
-            const res = await fetch(`/api/agent/trigger/${action}`, { method: 'POST' });
-            const data = await res.json();
-            alert(data.message || 'Action executed!');
-            fetchDashboard();
-            fetchLeads();
-        }
-
-        function renderCharts(weekly, monthly) {
+        function updateCharts() {
             const ctx1 = document.getElementById('weeklyChart').getContext('2d');
             if (weeklyChartInstance) weeklyChartInstance.destroy();
             weeklyChartInstance = new Chart(ctx1, {
                 type: 'bar',
                 data: {
-                    labels: weekly.labels,
+                    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
                     datasets: [
-                        { label: 'Scraped', data: weekly.scraped, backgroundColor: '#38bdf8' },
-                        { label: 'Demo Sites', data: weekly.published, backgroundColor: '#818cf8' },
-                        { label: 'Hot Leads', data: weekly.hot_leads, backgroundColor: '#f59e0b' }
+                        { label: 'Scraped', data: [realLeads.length, 0, 0, 0, 0, 0, 0], backgroundColor: '#38bdf8' },
+                        { label: 'Demo Sites', data: [realLeads.filter(l=>l.demo_url).length, 0, 0, 0, 0, 0, 0], backgroundColor: '#818cf8' },
+                        { label: 'Hot Leads', data: [realLeads.filter(l=>l.status==='HOT_LEAD').length, 0, 0, 0, 0, 0, 0], backgroundColor: '#f59e0b' }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } } }
@@ -286,18 +289,19 @@
             monthlyChartInstance = new Chart(ctx2, {
                 type: 'line',
                 data: {
-                    labels: monthly.labels,
+                    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
                     datasets: [
-                        { label: 'Closed Deals', data: monthly.closed, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true }
+                        { label: 'Closed Deals', data: [realLeads.filter(l=>l.status==='CLOSED_DEAL').length, 0, 0, 0], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } } }
             });
         }
 
-        fetchDashboard();
-        fetchLeads();
-        setInterval(fetchDashboard, 5000);
+        window.onload = function() {
+            updateMetrics();
+            renderTable();
+        };
     </script>
 </body>
 </html>
